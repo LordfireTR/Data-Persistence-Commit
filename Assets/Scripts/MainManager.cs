@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public TextMeshProUGUI hiScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -35,6 +37,10 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+        if(DataPersistanceHandler.Instance != null)
+        {
+            hiScoreText.text = "Best Score: " + DataPersistanceHandler.Instance.hiScoreName + " " + DataPersistanceHandler.Instance.bestScore;
         }
     }
 
@@ -66,11 +72,33 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+
+        if(DataPersistanceHandler.Instance != null)
+        {
+            if(m_Points > DataPersistanceHandler.Instance.bestScore)
+            {
+                DataPersistanceHandler.Instance.bestScore = m_Points;
+                DataPersistanceHandler.Instance.hiScoreName = DataPersistanceHandler.Instance.playerName;
+            }
+
+            hiScoreText.text = "Best Score: " + DataPersistanceHandler.Instance.hiScoreName + " " + DataPersistanceHandler.Instance.bestScore;
+        }
+
+
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if(DataPersistanceHandler.Instance != null)
+        {
+            DataPersistanceHandler.Instance.SaveHiScore();
+        }
+    }
+
+    public void BackToMenuButton()
+    {
+        SceneManager.LoadScene(0);
     }
 }
